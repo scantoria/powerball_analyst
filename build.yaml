@@ -7,4 +7,4 @@ targets:
         enabled: true
         options:
           explicit_to_json: true
-          field_rename: snake_case
+          field_rename: snake
