@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 
 /// Scaffold with bottom navigation bar
-class BottomNavScaffold extends StatefulWidget {
+/// Automatically syncs with current route
+class BottomNavScaffold extends StatelessWidget {
   final Widget child;
 
   const BottomNavScaffold({
@@ -11,14 +12,7 @@ class BottomNavScaffold extends StatefulWidget {
     required this.child,
   });
 
-  @override
-  State<BottomNavScaffold> createState() => _BottomNavScaffoldState();
-}
-
-class _BottomNavScaffoldState extends State<BottomNavScaffold> {
-  int _currentIndex = 0;
-
-  final List<_NavItem> _navItems = [
+  static final List<_NavItem> _navItems = [
     _NavItem(
       label: 'Dashboard',
       icon: Icons.home_outlined,
@@ -51,16 +45,22 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
     ),
   ];
 
+  /// Get current index based on location
+  int _getCurrentIndex(BuildContext context) {
+    final location = GoRouterState.of(context).uri.toString();
+    final index = _navItems.indexWhere((item) => item.route == location);
+    return index >= 0 ? index : 0;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentIndex = _getCurrentIndex(context);
+
     return Scaffold(
-      body: widget.child,
+      body: child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
+        selectedIndex: currentIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
           context.go(_navItems[index].route);
         },
         destinations: _navItems
@@ -73,7 +73,7 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
             )
             .toList(),
       ),
-      floatingActionButton: _currentIndex == 0
+      floatingActionButton: currentIndex == 0
           ? FloatingActionButton.extended(
               onPressed: () => context.push('/settings'),
               icon: const Icon(Icons.settings),
