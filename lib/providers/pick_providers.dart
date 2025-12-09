@@ -8,7 +8,7 @@ final picksProvider = Provider<List<Pick>>((ref) {
   final repo = ref.watch(pickRepositoryProvider);
   final currentCycle = ref.watch(currentCycleProvider);
   if (currentCycle == null) return [];
-  return repo.getPicksForCycle(currentCycle.id);
+  return repo.getByCycleId(currentCycle.id);
 });
 
 /// Provider for unevaluated picks
@@ -17,7 +17,7 @@ final unevaluatedPicksProvider = Provider<List<Pick>>((ref) {
   final repo = ref.watch(pickRepositoryProvider);
   final currentCycle = ref.watch(currentCycleProvider);
   if (currentCycle == null) return [];
-  return repo.getUnevaluatedPicks(currentCycle.id);
+  return repo.getUnevaluatedByCycle(currentCycle.id);
 });
 
 /// Provider for evaluated picks with results
@@ -25,7 +25,7 @@ final evaluatedPicksProvider = Provider<List<Pick>>((ref) {
   final repo = ref.watch(pickRepositoryProvider);
   final currentCycle = ref.watch(currentCycleProvider);
   if (currentCycle == null) return [];
-  return repo.getEvaluatedPicks(currentCycle.id);
+  return repo.getEvaluatedByCycle(currentCycle.id);
 });
 
 /// Provider for preliminary picks
@@ -87,7 +87,7 @@ final pickStatsProvider = Provider<Map<String, dynamic>>((ref) {
 /// Provider for pick history (all cycles)
 final pickHistoryProvider = Provider<List<Pick>>((ref) {
   final repo = ref.watch(pickRepositoryProvider);
-  return repo.getAllPicks();
+  return repo.getAll();
 });
 
 /// Provider for recent picks (last 10)
