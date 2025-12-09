@@ -9,8 +9,8 @@ import '../services/analysis/pattern_shift_detector.dart';
 import '../services/recommendation/pick_generator.dart';
 import '../services/recommendation/validation_service.dart';
 import 'baseline_providers.dart';
-import 'drawing_providers.dart';
 import 'cycle_providers.dart';
+import 'repository_providers.dart';
 
 // ========== Service Providers ==========
 
@@ -109,8 +109,8 @@ final patternShiftsProvider = Provider<List<PatternShift>>((ref) {
   final currentCycle = ref.watch(currentCycleProvider);
   if (currentCycle == null) return [];
 
-  // TODO: Fetch from PatternShiftRepository when implemented
-  return [];
+  final shiftRepo = ref.watch(patternShiftRepositoryProvider);
+  return shiftRepo.getByCycleId(currentCycle.id);
 });
 
 /// Provider for active (non-dismissed) pattern shifts

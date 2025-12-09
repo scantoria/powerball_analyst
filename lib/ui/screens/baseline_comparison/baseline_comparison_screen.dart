@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/baseline_providers.dart';
 import '../../../providers/cycle_providers.dart';
-import '../../../models/baseline.dart';
+import '../../../models/baseline.dart' as app_models;
 import '../../../core/constants/app_colors.dart';
 import '../../widgets/number_ball.dart';
 
@@ -160,7 +160,7 @@ class BaselineComparisonScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBaselineCard(BuildContext context, Baseline baseline) {
+  Widget _buildBaselineCard(BuildContext context, app_models.Baseline baseline) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -205,7 +205,7 @@ class BaselineComparisonScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildComparisonCard(BuildContext context, Baseline b0, Baseline bn) {
+  Widget _buildComparisonCard(BuildContext context, app_models.Baseline b0, app_models.Baseline bn) {
     final b0Set = Set<int>.from(b0.hotWhiteballs);
     final bnSet = Set<int>.from(bn.hotWhiteballs);
     final common = b0Set.intersection(bnSet).toList()..sort();
@@ -305,7 +305,7 @@ class BaselineComparisonScreen extends ConsumerWidget {
     return 'Significant divergence - pattern shift likely';
   }
 
-  String _formatDateRange(DateRange range) {
+  String _formatDateRange(app_models.DateRange range) {
     return '${_formatDate(range.startDate)} - ${_formatDate(range.endDate)}';
   }
 

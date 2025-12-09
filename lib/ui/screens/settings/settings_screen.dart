@@ -168,12 +168,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String _getDisplayModeLabel(DisplayMode mode) {
     switch (mode) {
-      case DisplayMode.compact:
-        return 'Compact';
-      case DisplayMode.comfortable:
-        return 'Comfortable';
-      case DisplayMode.detailed:
-        return 'Detailed';
+      case DisplayMode.simple:
+        return 'Simple';
+      case DisplayMode.advanced:
+        return 'Advanced';
     }
   }
 
@@ -181,12 +179,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     switch (level) {
       case SmoothingLevel.none:
         return 'None (Raw data)';
-      case SmoothingLevel.low:
-        return 'Low';
-      case SmoothingLevel.medium:
-        return 'Medium';
-      case SmoothingLevel.high:
-        return 'High';
+      case SmoothingLevel.light:
+        return 'Light';
+      case SmoothingLevel.normal:
+        return 'Normal';
+      case SmoothingLevel.heavy:
+        return 'Heavy';
     }
   }
 

@@ -3,6 +3,7 @@ import '../data/repositories/drawing_repository.dart';
 import '../data/repositories/cycle_repository.dart';
 import '../data/repositories/baseline_repository.dart';
 import '../data/repositories/pick_repository.dart';
+import '../data/repositories/pattern_shift_repository.dart';
 import '../data/api/ny_lottery_api.dart';
 import '../services/sync/data_sync_service.dart';
 
@@ -30,6 +31,10 @@ final baselineRepositoryProvider = Provider<BaselineRepository>((ref) {
 
 final pickRepositoryProvider = Provider<PickRepository>((ref) {
   return PickRepository();
+});
+
+final patternShiftRepositoryProvider = Provider<PatternShiftRepository>((ref) {
+  return PatternShiftRepository();
 });
 
 // Services

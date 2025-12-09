@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/baseline_providers.dart';
 import '../../../providers/cycle_providers.dart';
-import '../../../models/baseline.dart';
+import '../../../models/baseline.dart' as app_models;
 import '../../../core/constants/app_colors.dart';
 import '../../widgets/heat_map_grid.dart';
 import '../../widgets/number_ball.dart';
@@ -128,7 +128,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  Widget _buildHeatMapTab(Baseline baseline) {
+  Widget _buildHeatMapTab(app_models.Baseline baseline) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -185,7 +185,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  Widget _buildHotColdTab(Baseline baseline) {
+  Widget _buildHotColdTab(app_models.Baseline baseline) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -334,7 +334,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  Widget _buildStatisticsTab(Baseline baseline) {
+  Widget _buildStatisticsTab(app_models.Baseline baseline) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -428,7 +428,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  Widget _buildBaselineInfoCard(Baseline baseline) {
+  Widget _buildBaselineInfoCard(app_models.Baseline baseline) {
     return Card(
       color: AppColors.primaryBlue.withOpacity(0.1),
       child: Padding(
@@ -534,7 +534,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  void _showNumberDetails(int number, Baseline baseline, bool isWhiteBall) {
+  void _showNumberDetails(int number, app_models.Baseline baseline, bool isWhiteBall) {
     final frequency = isWhiteBall
         ? baseline.whiteballFreq[number] ?? 0
         : baseline.powerballFreq[number] ?? 0;
@@ -583,24 +583,24 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen>
     );
   }
 
-  String _getBaselineTypeLabel(BaselineType type) {
+  String _getBaselineTypeLabel(app_models.BaselineType type) {
     switch (type) {
-      case BaselineType.initial:
+      case app_models.BaselineType.initial:
         return 'Initial Baseline (B₀)';
-      case BaselineType.rolling:
+      case app_models.BaselineType.rolling:
         return 'Rolling Baseline (Bₙ)';
-      case BaselineType.preliminary:
+      case app_models.BaselineType.preliminary:
         return 'Preliminary Baseline (Bₚ)';
     }
   }
 
-  IconData _getBaselineIcon(BaselineType type) {
+  IconData _getBaselineIcon(app_models.BaselineType type) {
     switch (type) {
-      case BaselineType.initial:
+      case app_models.BaselineType.initial:
         return Icons.lock;
-      case BaselineType.rolling:
+      case app_models.BaselineType.rolling:
         return Icons.autorenew;
-      case BaselineType.preliminary:
+      case app_models.BaselineType.preliminary:
         return Icons.hourglass_empty;
     }
   }

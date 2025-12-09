@@ -31,7 +31,9 @@ class AppColors {
 
   // Status colors
   static const Color warning = accentOrange;
+  static const Color warningYellow = Color(0xFFFFC107);
   static const Color error = powerballRed;
+  static const Color errorRed = powerballRed;
   static const Color info = primaryBlue;
   static const Color success = successGreen;
 

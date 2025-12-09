@@ -204,7 +204,9 @@ class CycleRepository {
   }) async {
     try {
       final current = getCurrentCycle();
-      await closeCycle(current.id);
+      if (current != null) {
+        await closeCycle(current.id);
+      }
 
       if (createNew) {
         return await createCycle(
