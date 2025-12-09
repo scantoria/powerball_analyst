@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ years of manual tracking data. This revision (v1.1) incorporates the expanded baseline algorithm system with three-baseline tracking, smoothing factors, and enhanced pattern detection.
+Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ years of manual tracking data. This revision (v1.1) incorporates the expanded baseline algorithm system with three-baseline tracking, smoothing factors, enhanced pattern detection, and a simplified Hive-only local storage architecture (Firebase removed).
 
 ### 1.1 Project Overview
 
@@ -15,8 +15,8 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 | Project Name | Powerball Analyst |
 | Platform | Mobile (iOS/Android) via Flutter |
 | Duration | 10-12 weeks |
-| Estimated Effort | 163 hours (revised from 143) |
-| Tech Stack | Flutter, Firebase Firestore, Riverpod, Hive, NY Open Data API |
+| Estimated Effort | 156 hours (revised from 143) |
+| Tech Stack | Flutter, Riverpod, Hive, NY Open Data API |
 
 ### 1.2 v1.1 Changes Summary
 
@@ -26,7 +26,8 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 - **New UI screen:** Baseline Comparison (B₀ vs Bₙ)
 - **Enhanced detection:** 5 pattern shift triggers with dual-baseline comparison
 - **14 new requirements:** AN-12 through AN-25
-- **Effort increase:** +20 hours (143 → 163)
+- **Architecture change:** Removed Firebase, using Hive-only local storage
+- **Effort increase:** +13 hours (143 → 156)
 
 ---
 
@@ -34,44 +35,43 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 
 | Phase | Focus | Duration | Hours | Key Deliverables |
 |-------|-------|----------|-------|------------------|
-| Phase 1 | Foundation | 2 weeks | 28 | Project setup, models, Firebase |
-| Phase 2 | Core Features | 3-4 weeks | 52 | All screens, baseline system, picks |
+| Phase 1 | Foundation | 2 weeks | 25 | Project setup, models, Hive |
+| Phase 2 | Core Features | 3-4 weeks | 48 | All screens, baseline system, picks |
 | Phase 3 | Analysis Engine | 3 weeks | 48 | Algorithms, detection, auto-pick |
 | Phase 4 | Polish & Deploy | 2 weeks | 35 | Testing, optimization, release |
-| **TOTAL** | | **10-12 wks** | **163** | |
+| **TOTAL** | | **10-12 wks** | **156** | |
 
 ---
 
 ## 3. Detailed Task Breakdown
 
-### PHASE 1: Foundation (28 hours)
+### PHASE 1: Foundation (25 hours)
 
 | ID | Task | Hours | Status |
 |----|------|-------|--------|
 | 1.1 | Flutter project setup, folder structure | 3 | Not Started |
 | 1.2 | Configure dependencies (pubspec.yaml) | 2 | Not Started |
-| 1.3 | Firebase project setup and configuration | 3 | Not Started |
-| 1.4 | Hive local storage initialization | 2 | Not Started |
-| 1.5 | Create Drawing model with Freezed | 2 | Not Started |
-| 1.6 | Create Cycle model with status enum | 2 | Not Started |
-| 1.7 | Create Baseline model (B₀, Bₙ, Bₚ support) | 3 | Not Started |
-| 1.8 | Create Pick model | 2 | Not Started |
-| 1.9 | Create PatternShift model with triggers | 2 | Not Started |
-| 1.10 | Create Settings model with smoothing/sensitivity | 2 | Not Started |
-| 1.11 | Create NumberStats model | 1 | Not Started |
-| 1.12 | Set up Riverpod providers structure | 2 | Not Started |
-| 1.13 | Configure go_router navigation | 2 | Not Started |
+| 1.3 | Hive local storage initialization | 2 | Not Started |
+| 1.4 | Create Drawing model with Freezed | 2 | Not Started |
+| 1.5 | Create Cycle model with status enum | 2 | Not Started |
+| 1.6 | Create Baseline model (B₀, Bₙ, Bₚ support) | 3 | Not Started |
+| 1.7 | Create Pick model | 2 | Not Started |
+| 1.8 | Create PatternShift model with triggers | 2 | Not Started |
+| 1.9 | Create Settings model with smoothing/sensitivity | 2 | Not Started |
+| 1.10 | Create NumberStats model | 1 | Not Started |
+| 1.11 | Set up Riverpod providers structure | 2 | Not Started |
+| 1.12 | Configure go_router navigation | 2 | Not Started |
 
-### PHASE 2: Core Features (52 hours)
+### PHASE 2: Core Features (48 hours)
 
 | ID | Task | Hours | Status |
 |----|------|-------|--------|
 | 2.1 | NY Open Data API client (Dio) | 4 | Not Started |
-| 2.2 | DrawingRepository (Firebase + Hive) | 4 | Not Started |
-| 2.3 | CycleRepository with status management | 4 | Not Started |
-| 2.4 | BaselineRepository with history tracking | 4 | Not Started |
+| 2.2 | DrawingRepository (Hive) | 3 | Not Started |
+| 2.3 | CycleRepository with status management | 3 | Not Started |
+| 2.4 | BaselineRepository with history tracking | 3 | Not Started |
 | 2.5 | PickRepository with match evaluation | 3 | Not Started |
-| 2.6 | Data sync service (API → Firebase → Hive) | 4 | Not Started |
+| 2.6 | Data sync service (API → Hive) | 3 | Not Started |
 | 2.7 | Dashboard screen with phase status display | 5 | Not Started |
 | 2.8 | Analysis screen with heat map | 5 | Not Started |
 | 2.9 | Number Picker screen with validation | 5 | Not Started |
@@ -116,19 +116,21 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 
 | Phase | v1.0 | v1.1 | Delta | Reason |
 |-------|------|------|-------|--------|
-| Phase 1: Foundation | 24 | 28 | +4 | Enhanced models |
-| Phase 2: Core Features | 44 | 52 | +8 | New screen + repos |
+| Phase 1: Foundation | 24 | 25 | +1 | Enhanced models, removed Firebase |
+| Phase 2: Core Features | 44 | 48 | +4 | New screen, simplified repos |
 | Phase 3: Analysis Engine | 42 | 48 | +6 | Smoothing + detection |
 | Phase 4: Polish & Deploy | 33 | 35 | +2 | More test coverage |
-| **TOTAL** | **143** | **163** | **+20** | |
+| **TOTAL** | **143** | **156** | **+13** | |
 
-**Key additions driving effort increase:**
+**Key changes driving effort delta:**
 - Baseline Comparison screen (+5 hours)
 - Three-baseline model complexity (+3 hours)
 - Smoothing factor implementation (+4 hours)
 - Enhanced pattern shift detection (+4 hours)
 - Overlap score and comparison logic (+3 hours)
 - Additional test coverage (+2 hours)
+- Firebase removal (-7 hours: -3 setup, -4 repo complexity)
+- Net increase: +13 hours
 
 ---
 
@@ -139,7 +141,7 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 | API changes or downtime | Medium | Cache-first architecture, offline mode |
 | Baseline algorithm complexity | Medium | Comprehensive unit tests, phased rollout |
 | Pattern detection false positives | Medium | Adjustable sensitivity, dismiss option |
-| Firebase costs at scale | Low | Personal use only, Hive reduces reads |
+| Local storage limits | Low | Hive efficient for structured data, periodic cleanup |
 | Scope creep | High | Prioritized requirements (P1/P2/P3), MVP first |
 
 ---
@@ -162,4 +164,4 @@ Personal beta mobile app for analyzing Powerball lottery patterns based on 10+ y
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | Dec 4, 2025 | Project Owner | Initial project plan |
-| 1.1 | Dec 8, 2025 | Project Owner | Added baseline algorithm tasks, +20 hours, new screen |
+| 1.1 | Dec 8, 2025 | Project Owner | Added baseline algorithm tasks, removed Firebase (Hive-only), +13 hours, new screen |
