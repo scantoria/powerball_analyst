@@ -8,7 +8,7 @@ final baselinesProvider = Provider<List<Baseline>>((ref) {
   final repo = ref.watch(baselineRepositoryProvider);
   final currentCycle = ref.watch(currentCycleProvider);
   if (currentCycle == null) return [];
-  return repo.getBaselinesForCycle(currentCycle.id);
+  return repo.getByCycleId(currentCycle.id);
 });
 
 /// Provider for initial baseline (B₀)
@@ -18,7 +18,7 @@ final initialBaselineProvider = Provider<Baseline?>((ref) {
     return null;
   }
   final repo = ref.watch(baselineRepositoryProvider);
-  return repo.getBaseline(currentCycle.initialBaselineId!);
+  return repo.getById(currentCycle.initialBaselineId!);
 });
 
 /// Provider for rolling baseline (Bₙ)
@@ -28,7 +28,7 @@ final rollingBaselineProvider = Provider<Baseline?>((ref) {
     return null;
   }
   final repo = ref.watch(baselineRepositoryProvider);
-  return repo.getBaseline(currentCycle.rollingBaselineId!);
+  return repo.getById(currentCycle.rollingBaselineId!);
 });
 
 /// Provider for preliminary baseline (Bₚ)
@@ -43,7 +43,7 @@ final preliminaryBaselineProvider = Provider<Baseline?>((ref) {
   }
 
   final repo = ref.watch(baselineRepositoryProvider);
-  return repo.getBaseline(currentCycle.prelimBaselineId!);
+  return repo.getById(currentCycle.prelimBaselineId!);
 });
 
 /// Provider for active baseline
@@ -60,7 +60,7 @@ final activeBaselineProvider = Provider<Baseline?>((ref) {
 /// Returns all baselines sorted by creation date
 final baselineHistoryProvider = Provider<List<Baseline>>((ref) {
   final repo = ref.watch(baselineRepositoryProvider);
-  return repo.getAllBaselines();
+  return repo.getAll();
 });
 
 /// Provider for overlap score between B₀ and Bₙ

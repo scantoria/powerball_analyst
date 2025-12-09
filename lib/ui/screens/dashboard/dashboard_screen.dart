@@ -283,14 +283,14 @@ class DashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: NumberBall(
                         number: num,
-                        isWhiteBall: true,
+                        isPowerball: false,
                         size: 40,
                       ),
                     )),
                 const SizedBox(width: 8),
                 NumberBall(
                   number: drawing.powerball,
-                  isWhiteBall: false,
+                  isPowerball: true,
                   size: 40,
                 ),
               ],
