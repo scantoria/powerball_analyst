@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/cycle_providers.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../providers/baseline_providers.dart';
+import '../../../providers/analysis_providers.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../widgets/number_ball.dart';
 
@@ -22,6 +24,7 @@ class _PickerScreenState extends ConsumerState<PickerScreen> {
   @override
   Widget build(BuildContext context) {
     final currentCycle = ref.watch(currentCycleProvider);
+    final activeBaseline = ref.watch(activeBaselineProvider);
 
     if (currentCycle == null) {
       return Scaffold(
@@ -52,6 +55,23 @@ class _PickerScreenState extends ConsumerState<PickerScreen> {
             // Selected Numbers Display
             _buildSelectedNumbersCard(),
             const SizedBox(height: 24),
+
+            // Auto-Pick Button
+            if (activeBaseline != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('Generate Auto-Pick'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: _isSaving ? null : _generateAutoPick,
+                  ),
+                ),
+              ),
 
             // White Balls Selection
             Text(
@@ -408,6 +428,79 @@ class _PickerScreenState extends ConsumerState<PickerScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error saving pick: $e'),
+            backgroundColor: AppColors.errorRed,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _generateAutoPick() async {
+    final currentCycle = ref.read(currentCycleProvider);
+    final activeBaseline = ref.read(activeBaselineProvider);
+
+    if (currentCycle == null || activeBaseline == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No active cycle or baseline available'),
+          backgroundColor: AppColors.errorRed,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final generator = ref.read(pickGeneratorProvider);
+      final repo = ref.read(pickRepositoryProvider);
+
+      // Determine if this is a preliminary pick
+      final isPhase1 = ref.read(isPhase1Provider);
+
+      // Generate the auto-pick
+      final autoPick = await generator.generateAutoPick(
+        cycleId: currentCycle.id,
+        baseline: activeBaseline,
+        targetDrawDate: _targetDrawDate ?? DateTime.now().add(const Duration(days: 3)),
+        isPreliminary: isPhase1,
+      );
+
+      // Save it
+      await repo.save(autoPick);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Auto-pick generated! ${autoPick.explanation}',
+            ),
+            backgroundColor: AppColors.successGreen,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+
+        // Populate the form with generated numbers
+        setState(() {
+          _selectedWhiteBalls.clear();
+          _selectedWhiteBalls.addAll(autoPick.whiteBalls);
+          _selectedPowerball = autoPick.powerball;
+          _targetDrawDate = autoPick.targetDrawDate;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating auto-pick: $e'),
             backgroundColor: AppColors.errorRed,
           ),
         );

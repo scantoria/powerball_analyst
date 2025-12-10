@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../providers/cycle_providers.dart';
 import '../../../providers/drawing_providers.dart';
 import '../../../providers/pick_providers.dart';
+import '../../../providers/baseline_providers.dart';
+import '../../../providers/analysis_providers.dart';
+import '../../../providers/repository_providers.dart';
+import '../../../models/pattern_shift.dart';
 import '../../../services/sync/data_sync_service.dart';
 import '../../widgets/baseline_progress.dart';
 import '../../widgets/number_ball.dart';
@@ -22,6 +26,8 @@ class DashboardScreen extends ConsumerWidget {
     final drawingCount = ref.watch(drawingCountProvider);
     final syncStatusAsync = ref.watch(syncStatusProvider);
     final pickStats = ref.watch(pickStatsProvider);
+    final activeShifts = ref.watch(activeShiftsProvider);
+    final latestShift = ref.watch(latestShiftProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -66,6 +72,12 @@ class DashboardScreen extends ConsumerWidget {
                 error: (error, stack) => _buildErrorCard(context, 'Sync Status Error', error.toString()),
               ),
               const SizedBox(height: 16),
+
+              // Pattern Shift Alerts Card
+              if (activeShifts.isNotEmpty) ...[
+                _buildPatternShiftCard(context, ref, activeShifts, latestShift),
+                const SizedBox(height: 16),
+              ],
 
               // Latest Drawing Card
               if (latestDrawing != null) ...[
@@ -477,6 +489,117 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildPatternShiftCard(
+    BuildContext context,
+    WidgetRef ref,
+    List<PatternShift> shifts,
+    PatternShift? latestShift,
+  ) {
+    return Card(
+      color: _getShiftCardColor(latestShift?.severity),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: _getShiftIconColor(latestShift?.severity),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Pattern Shift Alert',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const Spacer(),
+                if (shifts.length > 1)
+                  Chip(
+                    label: Text('${shifts.length}'),
+                    backgroundColor: AppColors.errorRed.withOpacity(0.2),
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+              ],
+            ),
+            if (latestShift != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _getShiftDescription(latestShift.triggerType),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    'Severity: ${latestShift.severity.name.toUpperCase()}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _getShiftIconColor(latestShift.severity),
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => _dismissShift(ref, latestShift.id),
+                    child: const Text('Dismiss'),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getShiftCardColor(ShiftSeverity? severity) {
+    if (severity == null) return AppColors.warningYellow.withOpacity(0.1);
+    switch (severity) {
+      case ShiftSeverity.high:
+        return AppColors.errorRed.withOpacity(0.1);
+      case ShiftSeverity.medium:
+        return AppColors.warningYellow.withOpacity(0.1);
+      case ShiftSeverity.low:
+        return Colors.blue.withOpacity(0.1);
+    }
+  }
+
+  Color _getShiftIconColor(ShiftSeverity? severity) {
+    if (severity == null) return AppColors.warningYellow;
+    switch (severity) {
+      case ShiftSeverity.high:
+        return AppColors.errorRed;
+      case ShiftSeverity.medium:
+        return AppColors.warningYellow;
+      case ShiftSeverity.low:
+        return Colors.blue;
+    }
+  }
+
+  String _getShiftDescription(ShiftTrigger trigger) {
+    switch (trigger) {
+      case ShiftTrigger.longTermDrift:
+        return 'Long-term drift detected: Hot numbers from B₀ now below average';
+      case ShiftTrigger.shortTermSurge:
+        return 'Short-term surge: Multiple numbers jumped significantly';
+      case ShiftTrigger.baselineDivergence:
+        return 'Baseline divergence: B₀ and Bₙ patterns differ significantly';
+      case ShiftTrigger.correlationBreakdown:
+        return 'Correlation breakdown: Top pairs no longer co-occurring';
+      case ShiftTrigger.newDominance:
+        return 'New dominance: Previously uncommon numbers now top performers';
+    }
+  }
+
+  Future<void> _dismissShift(WidgetRef ref, String shiftId) async {
+    final repo = ref.read(patternShiftRepositoryProvider);
+    await repo.dismiss(shiftId);
+    ref.invalidate(patternShiftsProvider);
+  }
+
   void _syncData(BuildContext context, WidgetRef ref) async {
     // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
@@ -496,10 +619,51 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
 
-    // Trigger sync
-    ref.invalidate(syncStatusProvider);
-    ref.invalidate(latestDrawingProvider);
-    ref.invalidate(drawingCountProvider);
+    try {
+      // Trigger sync
+      ref.invalidate(syncStatusProvider);
+      ref.invalidate(latestDrawingProvider);
+      ref.invalidate(drawingCountProvider);
+
+      // Wait a moment for sync to complete
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Trigger orchestration after sync
+      final orchestrator = ref.read(cycleOrchestrationServiceProvider);
+      final drawingRepo = ref.read(drawingRepositoryProvider);
+
+      // Get recently added drawings (last 100)
+      final newDrawings = drawingRepo.getLatest(100);
+
+      // Process new drawings through orchestration
+      await orchestrator.onDrawingsAdded(newDrawings);
+
+      // Invalidate baseline providers to refresh UI
+      ref.invalidate(activeBaselineProvider);
+      ref.invalidate(initialBaselineProvider);
+      ref.invalidate(rollingBaselineProvider);
+      ref.invalidate(patternShiftsProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sync complete!'),
+            backgroundColor: AppColors.successGreen,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sync error: $e'),
+            backgroundColor: AppColors.errorRed,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   String _formatDate(DateTime date) {
